@@ -20,7 +20,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 // Configuration object for AQI ranges and sensor values
 const config = {
   aqi: {
-    min: 0,
+    min: 50,
     max: 200,
   },
   co: {
@@ -53,41 +53,41 @@ interface PollutantDataItem {
 
 const aqiCategories: AQICategory[] = [
   {
-    range: [0, config.aqi.max * 0.1],
+    range: [0, 50],
     label: 'Good',
     description:
       'Air quality is considered satisfactory, and air pollution poses little or no risk.',
     color: '#00e400',
   },
   {
-    range: [config.aqi.max * 0.1 + 1, config.aqi.max * 0.2],
+    range: [51, 100],
     label: 'Moderate',
     description:
       'Air quality is acceptable; however, some pollutants may pose a moderate health concern.',
     color: '#ffff00',
   },
   {
-    range: [config.aqi.max * 0.2 + 1, config.aqi.max * 0.3],
+    range: [101, 150],
     label: 'Unhealthy for Sensitive Groups',
     description: 'Members of sensitive groups may experience health effects.',
     color: '#ff7e00',
   },
   {
-    range: [config.aqi.max * 0.3 + 1, config.aqi.max * 0.4],
+    range: [151, 200],
     label: 'Unhealthy',
     description:
       'Everyone may begin to experience health effects; members of sensitive groups may experience more serious health effects.',
     color: '#ff0000',
   },
   {
-    range: [config.aqi.max * 0.4 + 1, config.aqi.max * 0.6],
+    range: [201, 300],
     label: 'Very Unhealthy',
     description:
       'Health alert: everyone may experience more serious health effects.',
     color: '#8f3f97',
   },
   {
-    range: [config.aqi.max * 0.6 + 1, config.aqi.max],
+    range: [301, 500],
     label: 'Hazardous',
     description:
       'Health warnings of emergency conditions. The entire population is likely to be affected.',
