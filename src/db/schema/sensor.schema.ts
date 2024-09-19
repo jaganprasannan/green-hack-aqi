@@ -1,7 +1,7 @@
-import { pgTable, text, uuid } from 'drizzle-orm/pg-core'
+import { pgTable, serial, text } from 'drizzle-orm/pg-core'
 
 export const sensors = pgTable('sensor', {
-  id: uuid('id').defaultRandom().primaryKey(),
+  id: serial('id').primaryKey(),
   uniqueName: text('unique_name').notNull(),
   ipAddress: text('ip_address'),
   airQuality: text('air_quality'),

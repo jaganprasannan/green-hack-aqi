@@ -20,25 +20,22 @@ export const sensorDataApp = new OpenAPIHono()
               schema: z
                 .array(
                   z.object({
-                    id: z.string(),
-                    location: z.string(),
-                    aqiGeneral: z.string(),
-                    aqiCo: z.string(),
+                    id: z.number(),
+                    uniqueName: z.string(),
+                    ipAddress: z.string().nullable(),
+                    airQuality: z.string().nullable(),
+                    coLevel: z.string().nullable(),
                   }),
                 )
                 .openapi('Sensor AQI Data'),
             },
           },
         },
-        404: {
-          description: 'Sensor Data Not Found',
-        },
         500: {
           description: 'Internal Server Error',
         },
       },
     }),
-
     async (c) => {
       try {
         const sensorData = await db.query.sensors.findMany()
@@ -58,14 +55,13 @@ export const sensorDataApp = new OpenAPIHono()
         params: z.object({
           id: z
             .string()
-            .uuid()
             .min(1, { message: 'ID required' })
             .openapi({
               param: {
                 name: 'id',
                 in: 'path',
               },
-              example: 'd4e5f6a7-b8c9-4d01-9e23-456f78901234',
+              example: '1',
             }),
         }),
       },
@@ -75,14 +71,13 @@ export const sensorDataApp = new OpenAPIHono()
           content: {
             'application/json': {
               schema: z
-                .array(
-                  z.object({
-                    id: z.string(),
-                    location: z.string(),
-                    aqiGeneral: z.string(),
-                    aqiCo: z.string(),
-                  }),
-                )
+                .object({
+                  id: z.number(),
+                  uniqueName: z.string(),
+                  ipAddress: z.string().nullable(),
+                  airQuality: z.string().nullable(),
+                  coLevel: z.string().nullable(),
+                })
                 .openapi('Sensor AQI Data'),
             },
           },
@@ -95,13 +90,15 @@ export const sensorDataApp = new OpenAPIHono()
         },
       },
     }),
-
     async (c) => {
       try {
         const { id } = c.req.valid('param')
         const sensorData = await db.query.sensors.findFirst({
-          where: eq(sensors.id, id),
+          where: eq(sensors.id, parseInt(id)),
         })
+        if (!sensorData) {
+          return c.json({ error: 'Sensor Data Not Found' }, 404)
+        }
         return c.json(sensorData, 200)
       } catch (error) {
         return c.json({ error: `An unexpected error occurred: ${error}` }, 500)
@@ -117,15 +114,14 @@ export const sensorDataApp = new OpenAPIHono()
         'Post the current concentration of the air pollution to find the Air Quality Index (AQI).',
       request: {
         body: {
-          description: 'The sensor data to post.',
           content: {
             'application/json': {
               schema: z
                 .object({
                   uniqueName: z.string(),
-                  ipAddress: z.string(),
-                  airQuality: z.string(),
-                  coLevel: z.string(),
+                  ipAddress: z.string().optional(),
+                  airQuality: z.string().optional(),
+                  coLevel: z.string().optional(),
                 })
                 .openapi('Sensor Data'),
             },
@@ -135,25 +131,18 @@ export const sensorDataApp = new OpenAPIHono()
       },
       responses: {
         200: {
-          description: 'Successful added sensor data.',
+          description: 'Successfully added sensor data.',
         },
         500: {
           description: 'Internal Server Error',
         },
       },
     }),
-
     async (c) => {
       try {
         const sensorData = c.req.valid('json')
-        await db.insert(sensors).values({
-          uniqueName: sensorData.uniqueName,
-          ipAddress: sensorData.ipAddress,
-          airQuality: sensorData.airQuality,
-          coLevel: sensorData.coLevel,
-        })
-
-        return c.json({ status: 'Successful added sensor data.' }, 200)
+        await db.insert(sensors).values(sensorData)
+        return c.json({ status: 'Successfully added sensor data.' }, 200)
       } catch (error) {
         return c.json({ error: `An unexpected error occurred: ${error}` }, 500)
       }
