@@ -9,7 +9,7 @@ import React, {
 } from 'react'
 
 import axios from 'axios'
-import { Send } from 'lucide-react'
+import { ArrowDown, Loader2, Send } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 
 import { Button } from '@/components/ui/button'
@@ -32,6 +32,7 @@ export default function ChatInterface(): JSX.Element {
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState<string>('')
   const [isLoading, setIsLoading] = useState<boolean>(false)
+  const [isScrolledToBottom, setIsScrolledToBottom] = useState<boolean>(true)
   const scrollRef = useRef<HTMLDivElement>(null)
 
   const handleSend = async (): Promise<void> => {
@@ -72,21 +73,33 @@ export default function ChatInterface(): JSX.Element {
     }
   }
 
-  useEffect(() => {
+  const handleScroll = (): void => {
     if (scrollRef.current) {
+      const isAtBottom =
+        scrollRef.current.scrollHeight - scrollRef.current.scrollTop ===
+        scrollRef.current.clientHeight
+      setIsScrolledToBottom(isAtBottom)
+    }
+  }
+
+  useEffect(() => {
+    if (scrollRef.current && isScrolledToBottom) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight
     }
-  }, [messages])
+  }, [messages, isScrolledToBottom])
 
   return (
-    <Card className='h-full flex flex-col bg-transparent border shadow-lg backdrop-blur-sm'>
+    <Card className='h-full flex flex-col bg-transparent border shadow-lg'>
       <CardHeader>
         <CardTitle className='text-xl font-semibold text-white'>
           Chat with AI
         </CardTitle>
       </CardHeader>
       <CardContent className='flex-grow'>
-        <ScrollArea className='h-[calc(100vh-400px)]' ref={scrollRef}>
+        <ScrollArea
+          className='h-[calc(100vh-400px)]'
+          ref={scrollRef}
+          onScroll={handleScroll}>
           {messages.map((message, index) => (
             <div
               key={index}
@@ -126,9 +139,13 @@ export default function ChatInterface(): JSX.Element {
           ))}
           {isLoading && (
             <div className='text-center'>
-              <span className='inline-block p-2 rounded-lg bg-gray-700 text-white'>
-                Thinking...
-              </span>
+              <Loader2 className='h-6 w-6 animate-spin text-white inline-block' />
+            </div>
+          )}
+          {!isScrolledToBottom && (
+            <div className='text-center'>
+              <ArrowDown className='h-6 w-6 animate-bounce text-white inline-block' />
+              <p className='text-sm text-white'>Scroll for more</p>
             </div>
           )}
         </ScrollArea>
