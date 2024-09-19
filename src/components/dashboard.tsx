@@ -136,7 +136,7 @@ const generatePollutantDataAndAQI = (
 
   return {
     pollutants: [
-      { name: 'MQ135', value: mq135, unit: 'ppm' },
+      { name: 'NH3', value: mq135, unit: 'ppm' },
       { name: 'CO', value: co, unit: 'ppm' },
     ],
     aqi,
