@@ -23,8 +23,8 @@ const config = {
     max: 50,
   },
   co: {
-    min: 0,
-    max: 40,
+    min: 0.1,
+    max: 1,
   },
   mq135: {
     min: 0.01,
