@@ -27,8 +27,8 @@ const config = {
     max: 40,
   },
   mq135: {
-    min: 50,
-    max: 200,
+    min: 400,
+    max: 1500,
   },
 }
 
