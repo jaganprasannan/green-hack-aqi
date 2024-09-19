@@ -1,11 +1,11 @@
 'use client'
 
 import React, {
-  ChangeEvent,
-  KeyboardEvent,
   useEffect,
   useRef,
   useState,
+  type ChangeEvent,
+  type KeyboardEvent,
 } from 'react'
 
 import axios from 'axios'
@@ -100,25 +100,21 @@ export default function ChatInterface(): JSX.Element {
                 ) : (
                   <ReactMarkdown
                     components={{
-                      p: ({ node, ...props }) => (
-                        <p className='mb-2' {...props} />
-                      ),
-                      ul: ({ node, ...props }) => (
+                      p: ({ ...props }) => <p className='mb-2' {...props} />,
+                      ul: ({ ...props }) => (
                         <ul className='list-disc ml-4 mb-2' {...props} />
                       ),
-                      ol: ({ node, ...props }) => (
+                      ol: ({ ...props }) => (
                         <ol className='list-decimal ml-4 mb-2' {...props} />
                       ),
-                      li: ({ node, ...props }) => (
-                        <li className='mb-1' {...props} />
-                      ),
-                      h1: ({ node, ...props }) => (
+                      li: ({ ...props }) => <li className='mb-1' {...props} />,
+                      h1: ({ ...props }) => (
                         <h1 className='text-xl font-bold mb-2' {...props} />
                       ),
-                      h2: ({ node, ...props }) => (
+                      h2: ({ ...props }) => (
                         <h2 className='text-lg font-semibold mb-2' {...props} />
                       ),
-                      strong: ({ node, ...props }) => (
+                      strong: ({ ...props }) => (
                         <strong className='font-bold' {...props} />
                       ),
                     }}>

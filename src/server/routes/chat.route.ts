@@ -1,5 +1,4 @@
 import { createRoute, OpenAPIHono, z } from '@hono/zod-openapi'
-import OpenAI from 'openai'
 
 import { env } from '../../../env.mjs'
 
