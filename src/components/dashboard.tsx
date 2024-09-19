@@ -20,7 +20,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 const config = {
   aqi: {
     min: 70,
-    max: 200,
+    max: 300,
   },
   co: {
     min: 0,
