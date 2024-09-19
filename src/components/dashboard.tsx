@@ -17,6 +17,22 @@ import {
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
+// Configuration object for AQI ranges and sensor values
+const config = {
+  aqi: {
+    min: 0,
+    max: 200,
+  },
+  co: {
+    min: 0,
+    max: 40,
+  },
+  mq135: {
+    min: 0,
+    max: 350,
+  },
+}
+
 interface AQICategory {
   range: [number, number]
   label: string
@@ -37,41 +53,41 @@ interface PollutantDataItem {
 
 const aqiCategories: AQICategory[] = [
   {
-    range: [0, 50],
+    range: [0, config.aqi.max * 0.1],
     label: 'Good',
     description:
       'Air quality is considered satisfactory, and air pollution poses little or no risk.',
     color: '#00e400',
   },
   {
-    range: [51, 100],
+    range: [config.aqi.max * 0.1 + 1, config.aqi.max * 0.2],
     label: 'Moderate',
     description:
       'Air quality is acceptable; however, some pollutants may pose a moderate health concern.',
     color: '#ffff00',
   },
   {
-    range: [101, 150],
+    range: [config.aqi.max * 0.2 + 1, config.aqi.max * 0.3],
     label: 'Unhealthy for Sensitive Groups',
     description: 'Members of sensitive groups may experience health effects.',
     color: '#ff7e00',
   },
   {
-    range: [151, 200],
+    range: [config.aqi.max * 0.3 + 1, config.aqi.max * 0.4],
     label: 'Unhealthy',
     description:
       'Everyone may begin to experience health effects; members of sensitive groups may experience more serious health effects.',
     color: '#ff0000',
   },
   {
-    range: [201, 300],
+    range: [config.aqi.max * 0.4 + 1, config.aqi.max * 0.6],
     label: 'Very Unhealthy',
     description:
       'Health alert: everyone may experience more serious health effects.',
     color: '#8f3f97',
   },
   {
-    range: [301, 500],
+    range: [config.aqi.max * 0.6 + 1, config.aqi.max],
     label: 'Hazardous',
     description:
       'Health warnings of emergency conditions. The entire population is likely to be affected.',
@@ -90,18 +106,15 @@ const getAQICategory = (aqi: number): AQICategory => {
 
 // Function to calculate AQI for CO pollutant based on its concentration
 const calculateAQIForCO = (co: number): number => {
-  if (co <= 4.4) return (co / 4.4) * 50
-  if (co <= 9.4) return ((co - 4.4) / (9.4 - 4.4)) * (100 - 51) + 51
-  if (co <= 12.4) return ((co - 9.4) / (12.4 - 9.4)) * (150 - 101) + 101
-  if (co <= 15.4) return ((co - 12.4) / (15.4 - 12.4)) * (200 - 151) + 151
-  if (co <= 30.4) return ((co - 15.4) / (30.4 - 15.4)) * (300 - 201) + 201
-  if (co <= 40.4) return ((co - 30.4) / (40.4 - 30.4)) * (400 - 301) + 301
-  return 500
+  const normalizedCO = (co - config.co.min) / (config.co.max - config.co.min)
+  return normalizedCO * config.aqi.max
 }
 
 // Mocked functions to simulate sensor readings from MQ135 and MQ7
-const generateRandomCO = (): number => Math.random() * 40 // MQ7 sensor for CO
-const generateRandomMQ135 = (): number => Math.random() * 350 // MQ135 sensor for combined CO2 and NH3
+const generateRandomCO = (): number =>
+  Math.random() * (config.co.max - config.co.min) + config.co.min
+const generateRandomMQ135 = (): number =>
+  Math.random() * (config.mq135.max - config.mq135.min) + config.mq135.min
 
 // Update AQI calculation to use CO level
 const generatePollutantDataAndAQI = (): {
@@ -177,7 +190,7 @@ export default function AQIDashboard(): JSX.Element {
                   ))}
                 </div>
               </div>
-              {currentAQI > 100 ? (
+              {currentAQI > config.aqi.max * 0.2 ? (
                 <AlertTriangle className='w-16 h-16 text-yellow-500' />
               ) : (
                 <Leaf className='w-16 h-16 text-green-500' />
@@ -198,7 +211,7 @@ export default function AQIDashboard(): JSX.Element {
               <LineChart data={aqiHistory}>
                 <CartesianGrid strokeDasharray='3 3' stroke='#4B5563' />
                 <XAxis dataKey='time' stroke='#9CA3AF' />
-                <YAxis stroke='#9CA3AF' />
+                <YAxis domain={[0, config.aqi.max]} stroke='#9CA3AF' />
                 <Tooltip
                   contentStyle={{
                     backgroundColor: 'rgba(31, 41, 55, 0.8)',
