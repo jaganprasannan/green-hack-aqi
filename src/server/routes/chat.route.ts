@@ -50,7 +50,7 @@ export const chatApp = new OpenAPIHono().openapi(
 
   async (c) => {
     try {
-      const { message } = await c.req.valid('json')
+      const { message } = c.req.valid('json')
 
       const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
         method: 'POST',

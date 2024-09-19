@@ -101,8 +101,7 @@ const calculateAQIForCO = (co: number): number => {
 
 // Mocked functions to simulate sensor readings from MQ135 and MQ7
 const generateRandomCO = (): number => Math.random() * 40 // MQ7 sensor for CO
-const generateRandomNH3 = (): number => Math.random() * 50 // MQ135 sensor for NH3
-const generateRandomCO2 = (): number => Math.random() * 1000 // MQ135 sensor for CO2
+const generateRandomMQ135 = (): number => Math.random() * 350 // MQ135 sensor for combined CO2 and NH3
 
 // Update AQI calculation to use CO level
 const generatePollutantDataAndAQI = (): {
@@ -110,15 +109,13 @@ const generatePollutantDataAndAQI = (): {
   aqi: number
 } => {
   const co = generateRandomCO()
-  const nh3 = generateRandomNH3()
-  const co2 = generateRandomCO2()
+  const mq135 = generateRandomMQ135()
 
   const aqi = calculateAQIForCO(co) // Calculate AQI based on CO
 
   return {
     pollutants: [
-      { name: 'CO2', value: co2, unit: 'ppm' },
-      { name: 'NH3', value: nh3, unit: 'ppm' },
+      { name: 'MQ135', value: mq135, unit: 'ppm' },
       { name: 'CO', value: co, unit: 'ppm' },
     ],
     aqi,
