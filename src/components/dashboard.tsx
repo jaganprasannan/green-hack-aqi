@@ -17,10 +17,9 @@ import {
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
-// Configuration object for AQI ranges and sensor values
 const config = {
   aqi: {
-    min: 50,
+    min: 70,
     max: 200,
   },
   co: {
@@ -95,7 +94,6 @@ const aqiCategories: AQICategory[] = [
   },
 ]
 
-// Helper function to get AQI category
 const getAQICategory = (aqi: number): AQICategory => {
   return (
     aqiCategories.find(
@@ -104,27 +102,37 @@ const getAQICategory = (aqi: number): AQICategory => {
   )
 }
 
-// Function to calculate AQI for CO pollutant based on its concentration
 const calculateAQIForCO = (co: number): number => {
   const normalizedCO = (co - config.co.min) / (config.co.max - config.co.min)
-  return normalizedCO * config.aqi.max
+  return config.aqi.min + normalizedCO * (config.aqi.max - config.aqi.min)
 }
 
-// Mocked functions to simulate sensor readings from MQ135 and MQ7
-const generateRandomCO = (): number =>
-  Math.random() * (config.co.max - config.co.min) + config.co.min
-const generateRandomMQ135 = (): number =>
-  Math.random() * (config.mq135.max - config.mq135.min) + config.mq135.min
+const generateSmoothedValue = (
+  prevValue: number,
+  min: number,
+  max: number,
+  maxChange: number,
+): number => {
+  const change = (Math.random() * 2 - 1) * maxChange
+  return Math.max(min, Math.min(max, prevValue + change))
+}
 
-// Update AQI calculation to use CO level
-const generatePollutantDataAndAQI = (): {
+const generatePollutantDataAndAQI = (
+  prevCO: number,
+  prevMQ135: number,
+): {
   pollutants: PollutantDataItem[]
   aqi: number
 } => {
-  const co = generateRandomCO()
-  const mq135 = generateRandomMQ135()
+  const co = generateSmoothedValue(prevCO, config.co.min, config.co.max, 4)
+  const mq135 = generateSmoothedValue(
+    prevMQ135,
+    config.mq135.min,
+    config.mq135.max,
+    20,
+  )
 
-  const aqi = calculateAQIForCO(co) // Calculate AQI based on CO
+  const aqi = calculateAQIForCO(co)
 
   return {
     pollutants: [
@@ -136,13 +144,20 @@ const generatePollutantDataAndAQI = (): {
 }
 
 export default function AQIDashboard(): JSX.Element {
-  const [currentAQI, setCurrentAQI] = useState<number>(0)
+  const [currentAQI, setCurrentAQI] = useState<number>(135)
   const [aqiHistory, setAQIHistory] = useState<AQIHistoryItem[]>([])
-  const [pollutantData, setPollutantData] = useState<PollutantDataItem[]>([])
+  const [pollutantData, setPollutantData] = useState<PollutantDataItem[]>([
+    { name: 'MQ135', value: 175, unit: 'ppm' },
+    { name: 'CO', value: 20, unit: 'ppm' },
+  ])
 
   useEffect(() => {
     const interval = setInterval(() => {
-      const { pollutants, aqi } = generatePollutantDataAndAQI()
+      const prevCO = pollutantData.find((p) => p.name === 'CO')?.value || 20
+      const prevMQ135 =
+        pollutantData.find((p) => p.name === 'MQ135')?.value || 175
+
+      const { pollutants, aqi } = generatePollutantDataAndAQI(prevCO, prevMQ135)
 
       setCurrentAQI(aqi)
       setPollutantData(pollutants)
@@ -152,14 +167,13 @@ export default function AQIDashboard(): JSX.Element {
     }, 3000)
 
     return () => clearInterval(interval)
-  }, [])
+  }, [pollutantData])
 
   const aqiCategory = getAQICategory(currentAQI)
 
   return (
     <div className='h-full'>
       <div className='grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6'>
-        {/* Current AQI Card */}
         <Card className='bg-transparent border shadow-lg backdrop-blur-sm'>
           <CardHeader className='pb-2'>
             <CardTitle className='text-xl font-semibold text-white'>
@@ -180,7 +194,6 @@ export default function AQIDashboard(): JSX.Element {
                 <p className='text-sm text-gray-400'>
                   {aqiCategory.description}
                 </p>
-                {/* Display pollutant levels here */}
                 <div className='mt-2'>
                   {pollutantData.map((pollutant) => (
                     <p key={pollutant.name} className='text-sm text-gray-400'>
@@ -190,7 +203,7 @@ export default function AQIDashboard(): JSX.Element {
                   ))}
                 </div>
               </div>
-              {currentAQI > config.aqi.max * 0.2 ? (
+              {currentAQI > config.aqi.max * 0.6 ? (
                 <AlertTriangle className='w-16 h-16 text-yellow-500' />
               ) : (
                 <Leaf className='w-16 h-16 text-green-500' />
@@ -199,7 +212,6 @@ export default function AQIDashboard(): JSX.Element {
           </CardContent>
         </Card>
 
-        {/* AQI Trend Card */}
         <Card className='bg-transparent border shadow-lg backdrop-blur-sm'>
           <CardHeader className='pb-2'>
             <CardTitle className='text-xl font-semibold text-white'>
@@ -211,7 +223,10 @@ export default function AQIDashboard(): JSX.Element {
               <LineChart data={aqiHistory}>
                 <CartesianGrid strokeDasharray='3 3' stroke='#4B5563' />
                 <XAxis dataKey='time' stroke='#9CA3AF' />
-                <YAxis domain={[0, config.aqi.max]} stroke='#9CA3AF' />
+                <YAxis
+                  domain={[config.aqi.min, config.aqi.max]}
+                  stroke='#9CA3AF'
+                />
                 <Tooltip
                   contentStyle={{
                     backgroundColor: 'rgba(31, 41, 55, 0.8)',
@@ -230,7 +245,6 @@ export default function AQIDashboard(): JSX.Element {
           </CardContent>
         </Card>
 
-        {/* Pollutant Levels Card */}
         <Card className='md:col-span-2 bg-transparent border shadow-lg backdrop-blur-sm'>
           <CardHeader className='pb-2'>
             <CardTitle className='text-xl font-semibold text-white'>
