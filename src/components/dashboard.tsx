@@ -19,16 +19,16 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 const config = {
   aqi: {
-    min: 70,
-    max: 300,
+    min: 50,
+    max: 110,
   },
   co: {
     min: 0,
     max: 40,
   },
   mq135: {
-    min: 0,
-    max: 350,
+    min: 400,
+    max: 1500,
   },
 }
 
@@ -136,7 +136,7 @@ const generatePollutantDataAndAQI = (
 
   return {
     pollutants: [
-      { name: 'MQ135', value: mq135, unit: 'ppm' },
+      { name: 'NH3', value: mq135, unit: 'ppm' },
       { name: 'CO', value: co, unit: 'ppm' },
     ],
     aqi,
@@ -147,7 +147,7 @@ export default function AQIDashboard(): JSX.Element {
   const [currentAQI, setCurrentAQI] = useState<number>(135)
   const [aqiHistory, setAQIHistory] = useState<AQIHistoryItem[]>([])
   const [pollutantData, setPollutantData] = useState<PollutantDataItem[]>([
-    { name: 'MQ135', value: 175, unit: 'ppm' },
+    { name: 'NH3', value: 175, unit: 'ppm' },
     { name: 'CO', value: 20, unit: 'ppm' },
   ])
 
