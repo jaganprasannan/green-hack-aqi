@@ -147,7 +147,7 @@ export default function AQIDashboard(): JSX.Element {
   const [currentAQI, setCurrentAQI] = useState<number>(135)
   const [aqiHistory, setAQIHistory] = useState<AQIHistoryItem[]>([])
   const [pollutantData, setPollutantData] = useState<PollutantDataItem[]>([
-    { name: 'MQ135', value: 175, unit: 'ppm' },
+    { name: 'NH3', value: 175, unit: 'ppm' },
     { name: 'CO', value: 20, unit: 'ppm' },
   ])
 
